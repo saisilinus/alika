@@ -71,7 +71,7 @@ async function main() {
 
   // 2. Install frontend dependencies
   log("\n2. Installing frontend dependencies...", "cyan")
-  if (!runCommand("npm install", "Frontend dependency installation")) {
+  if (!runCommand("pnpm install", "Frontend dependency installation")) {
     log("❌ Failed to install frontend dependencies", "red")
     process.exit(1)
   }
@@ -87,7 +87,7 @@ async function main() {
 
   // 4. Install backend dependencies
   log("\n4. Installing backend dependencies...", "cyan")
-  if (!runCommand("cd server && npm install", "Backend dependency installation")) {
+  if (!runCommand("cd server && pnpm install", "Backend dependency installation")) {
     log("❌ Failed to install backend dependencies", "red")
     process.exit(1)
   }
@@ -132,11 +132,11 @@ async function main() {
   log("   2. Get your database URL from Project Settings > Database", "cyan")
   log("   3. Update DATABASE_URL in server/.env", "cyan")
   log("   4. Run database initialization:", "cyan")
-  log("      npm run setup:db", "cyan")
+  log("      pnpm setup:db", "cyan")
 
   log("\n🚀 Start Development:", "green")
-  log("   1. Start backend:  cd server && npm run dev", "green")
-  log("   2. Start frontend: npm run dev", "green")
+  log("   1. Start backend:  cd server && pnpm dev", "green")
+  log("   2. Start frontend: pnpm dev", "green")
   log("   3. Open http://localhost:3000", "green")
 
   log("\n🔐 Default Admin Account:", "magenta")

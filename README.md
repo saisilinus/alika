@@ -34,7 +34,7 @@ A comprehensive campaign banner generation platform built with Next.js and Expre
 
 ### Prerequisites
 - Node.js 18+ 
-- npm or yarn
+- pnpm (install with: npm install -g pnpm)
 - Supabase account
 
 ### 1. Clone Repository
@@ -45,7 +45,7 @@ cd alika
 
 ### 2. Automated Setup
 \`\`\`bash
-npm run setup
+pnpm setup
 \`\`\`
 
 This will:
@@ -72,17 +72,17 @@ JWT_REFRESH_SECRET=your_refresh_secret
 
 ### 4. Database Setup
 \`\`\`bash
-npm run setup:db
+pnpm setup:db
 \`\`\`
 
 ### 5. Start Development
 \`\`\`bash
 # Start both frontend and backend
-npm run dev:full
+pnpm dev:full
 
 # Or start separately
-npm run dev              # Frontend (port 3000)
-npm run dev:backend      # Backend (port 5000)
+pnpm dev              # Frontend (port 3000)
+pnpm dev:backend      # Backend (port 5000)
 \`\`\`
 
 ## 📁 Project Structure
@@ -112,24 +112,24 @@ alika/
 
 ### Frontend
 \`\`\`bash
-npm run dev              # Start development server
-npm run build            # Build for production
-npm run start            # Start production server
-npm run lint             # Run ESLint
+pnpm dev              # Start development server
+pnpm build            # Build for production
+pnpm start            # Start production server
+pnpm lint             # Run ESLint
 \`\`\`
 
 ### Backend
 \`\`\`bash
-npm run dev:backend      # Start backend development
-npm run setup:backend    # Install backend dependencies
-npm run setup:db         # Initialize database
+pnpm dev:backend      # Start backend development
+pnpm setup:backend    # Install backend dependencies
+pnpm setup:db         # Initialize database
 \`\`\`
 
 ### Full Stack
 \`\`\`bash
-npm run setup            # Complete project setup
-npm run dev:full         # Start both servers
-npm run build:all        # Build entire project
+pnpm setup            # Complete project setup
+pnpm dev:full         # Start both servers
+pnpm build:all        # Build entire project
 \`\`\`
 
 ## 🗄️ Database Schema
@@ -198,8 +198,8 @@ Ensure all production environment variables are set:
 
 ### Build Commands
 \`\`\`bash
-npm run build:all        # Build frontend and backend
-npm start                # Start production server
+pnpm build:all        # Build frontend and backend
+pnpm start            # Start production server
 \`\`\`
 
 ## 🤝 Contributing

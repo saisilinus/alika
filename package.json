@@ -5,13 +5,13 @@
   "scripts": {
     "build": "next build",
     "build:all": "npm run build:backend && npm run build",
-    "build:backend": "cd server && npm run build",
+    "build:backend": "cd server && pnpm build",
     "dev": "next dev",
-    "dev:backend": "cd server && npm run dev",
+    "dev:backend": "cd server && pnpm dev",
     "dev:full": "concurrently \"npm run dev:backend\" \"npm run dev\"",
     "lint": "next lint",
     "setup": "node scripts/setup.js",
-    "setup:backend": "cd server && npm install",
+    "setup:backend": "cd server && pnpm install",
     "setup:db": "cd server && node scripts/init-database.js",
     "start": "next start"
   },
@@ -95,5 +95,10 @@
     "postcss": "^8.5",
     "tailwindcss": "^3.4.17",
     "typescript": "^5"
+  },
+  "packageManager": "pnpm@8.0.0",
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
   }
 }
