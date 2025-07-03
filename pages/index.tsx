@@ -15,10 +15,10 @@ const trendingBanners = [
     id: 1,
     title: "Cracking the Code 1.0",
     description: "University Life Career Launch & Beyond",
-    thumbnail: "/placeholder.svg?height=200&width=300",
+    thumbnail: "/hero.jpg?height=200&width=300",
     creator: {
       name: "Tech University",
-      avatar: "/placeholder.svg?height=40&width=40",
+      avatar: "/hero.jpg?height=40&width=40",
     },
     viewCount: 1250,
     createdAt: "2024-01-15",
@@ -28,7 +28,7 @@ const trendingBanners = [
     id: 2,
     title: "Summer Music Festival",
     description: "Join us for the biggest music celebration",
-    thumbnail: "/placeholder.svg?height=200&width=300",
+    thumbnail: "/img2.jpg?height=200&width=300",
     creator: {
       name: "Music Events",
       avatar: "/placeholder.svg?height=40&width=40",
@@ -93,7 +93,7 @@ export default function HomePage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [user, setUser] = useState({
     name: "John Doe",
-    avatar: "/placeholder.svg?height=32&width=32",
+    avatar: "/hero.jpg?height=32&width=32",
     role: "user",
   });
 
@@ -121,29 +121,30 @@ export default function HomePage() {
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex space-x-8">
+               <a
+                href="#create"
+                className="text-gray-700 hover:text-gray-900 font-medium"
+              >
+                Create
+              </a>
               <a
                 href="#discover"
                 className="text-gray-700 hover:text-gray-900 font-medium"
               >
-                DISCOVER
+                Recent Campaigns/Events
               </a>
               <a
                 href="#categories"
                 className="text-gray-700 hover:text-gray-900 font-medium"
               >
-                BROWSE CATEGORIES
+                Categories
               </a>
+             
               <a
-                href="#create"
+                href="/#"
                 className="text-gray-700 hover:text-gray-900 font-medium"
               >
-                CREATE DP BANNER
-              </a>
-              <a
-                href="/terminal"
-                className="text-gray-700 hover:text-gray-900 font-medium"
-              >
-                TERMINAL
+                Help
               </a>
             </nav>
 
@@ -158,7 +159,7 @@ export default function HomePage() {
                       setIsAuthModalOpen(true);
                     }}
                   >
-                    LOGIN
+                    Login
                   </Button>
                   <Button
                     onClick={() => {
@@ -166,7 +167,7 @@ export default function HomePage() {
                       setIsAuthModalOpen(true);
                     }}
                   >
-                    REGISTER
+                    Register
                   </Button>
                 </>
               ) : (
@@ -213,10 +214,10 @@ export default function HomePage() {
                   CREATE DP BANNER
                 </a>
                 <a
-                  href="/terminal"
+                  href="/#"
                   className="text-gray-700 hover:text-gray-900 font-medium"
                 >
-                  TERMINAL
+                  Help
                 </a>
                 {!isLoggedIn ? (
                   <div className="flex space-x-2 pt-2">
@@ -254,29 +255,32 @@ export default function HomePage() {
       </header>
 
       {/* Hero Section */}
+      {/* <section className="relative bg-gradient-to-r from-blue-600 to-purple-700 text-white py-20 lg:py-32"> */}
       <section className="relative bg-gradient-to-r from-blue-600 to-purple-700 text-white py-20 lg:py-32">
+        <div className="absolute inset-0 bg-cover bg-bottom bg-no-repeat opacity-20" style={{backgroundImage: 'url("/hero.jpg")'}}></div>
         <div className="absolute inset-0 bg-black opacity-20"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            Get people connected to your brand
+            Let you audiences champion your cause!
           </h1>
           <p className="text-xl md:text-2xl mb-8 text-gray-100">
-            Promoting your event or organization has never been easier
+            Everything you need to build unstoppable momentum on your Campaign or Event
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
               size="lg"
+              className="bg-orange-500 hover:bg-orange-600 text-white"
+            >
+              Get Started
+            </Button>
+            {/* <Button
+              size="lg"
               variant="secondary"
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
-              Browse Categories
-            </Button>
-            <Button
-              size="lg"
-              className="bg-orange-500 hover:bg-orange-600 text-white"
-            >
-              Create Banner
-            </Button>
+              Categories
+            </Button> */}
+            
           </div>
         </div>
       </section>
@@ -286,16 +290,11 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-3xl font-bold text-gray-900">
-              Trending Banners
+              Recent Campaigns & Events
             </h2>
-            <Button
-              variant="ghost"
-              className="text-blue-600 hover:text-blue-700"
-            >
-              View All <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
+            
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6">
             {trendingBanners.map((banner) => (
               <Card
                 key={banner.id}
@@ -345,10 +344,17 @@ export default function HomePage() {
               </Card>
             ))}
           </div>
+          <br></br>
+          <Button
+              variant="ghost"
+              className="text-blue-600 hover:text-blue-700"
+            >
+              View All <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
         </div>
       </section>
 
-      {/* Latest Banners Section */}
+      {/* Latest Banners Section
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-8">
@@ -416,15 +422,15 @@ export default function HomePage() {
               ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Browse by Category Section */}
       <section id="categories" className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">
-            Browse by Category
+          <h2 className="text-3xl font-bold text-gray-900 text-left mb-12">
+            Categories
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {categories.map((category) => (
               <Card
                 key={category.name}
@@ -458,7 +464,10 @@ export default function HomePage() {
             <div>
               <h3 className="text-xl font-bold mb-4">Alika</h3>
               <p className="text-gray-400">
-                Get people connected to your brand with personalized banners.
+                Let you audiences champion your cause!
+              </p><br></br>
+              <p className="text-gray-400">
+                With <b>Alika</b> you Get Everything you need to build unstoppable momentum on your Campaign or Event
               </p>
             </div>
             <div>
@@ -466,12 +475,12 @@ export default function HomePage() {
               <ul className="space-y-2 text-gray-400">
                 <li>
                   <a href="#" className="hover:text-white">
-                    Browse Banners
+                    Browse Templates
                   </a>
                 </li>
                 <li>
                   <a href="#" className="hover:text-white">
-                    Create Banner
+                    Create your own
                   </a>
                 </li>
                 <li>
@@ -523,7 +532,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 Alika. All rights reserved.</p>
+            <p>&copy; 2025 Alika. All rights reserved.</p>
           </div>
         </div>
       </footer>

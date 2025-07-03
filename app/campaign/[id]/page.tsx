@@ -8,10 +8,11 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Separator } from "@/components/ui/separator"
-import { Eye, Calendar, Facebook, Twitter, Linkedin, Download, ArrowLeft } from "lucide-react"
+import { Eye, Calendar, Facebook, Twitter, Linkedin, Download, ArrowLeft, Menu, X } from "lucide-react"
 import PhotoUpload from "@/components/photo-upload"
 import BannerPreview from "@/components/banner-preview"
 import CommentsSection from "@/components/comments-section"
+import UserDropdown from "@/components/user-dropdown";
 
 // Mock campaign data - replace with real API call
 const campaignData = {
@@ -74,7 +75,28 @@ export default function CampaignDetailPage() {
   const [isPublic, setIsPublic] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
   const [newComment, setNewComment] = useState("")
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<"login" | "register">("login");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState({
+      name: "John Doe",
+      avatar: "/placeholder.svg?height=32&width=32",
+      role: "user",
+    });
 
+const handleAuthSuccess = (userData: any) => {
+    setIsLoggedIn(true);
+    setUser(userData);
+    setIsAuthModalOpen(false);
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setUser({ name: "", avatar: "", role: "user" });
+  };
+
+  
   const handlePhotoUpload = (photoUrl: string) => {
     setUserPhoto(photoUrl)
   }
@@ -122,15 +144,157 @@ export default function CampaignDetailPage() {
       window.open(shareUrls[platform as keyof typeof shareUrls], "_blank", "width=600,height=400")
     }
   }
-
+ 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo */}
+            <div className="flex-shrink-0">
+              <h1 className="text-2xl font-bold text-gray-900">Alika</h1>
+            </div>
+
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex space-x-8">
+               <a
+                href="#create"
+                className="text-gray-700 hover:text-gray-900 font-medium"
+              >
+                Create
+              </a>
+              <a
+                href="#discover"
+                className="text-gray-700 hover:text-gray-900 font-medium"
+              >
+                Recent Campaigns/Events
+              </a>
+              <a
+                href="#categories"
+                className="text-gray-700 hover:text-gray-900 font-medium"
+              >
+                Categories
+              </a>
+             
+              <a
+                href="/#"
+                className="text-gray-700 hover:text-gray-900 font-medium"
+              >
+                Help
+              </a>
+            </nav>
+
+            {/* Desktop Auth */}
+            <div className="hidden md:flex items-center space-x-4">
+              {!isLoggedIn ? (
+                <>
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      setAuthMode("login");
+                      setIsAuthModalOpen(true);
+                    }}
+                  >
+                    Login
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setAuthMode("register");
+                      setIsAuthModalOpen(true);
+                    }}
+                  >
+                    Register
+                  </Button>
+                </>
+              ) : (
+                <UserDropdown user={user} onLogout={handleLogout} />
+              )}
+            </div>
+
+            {/* Mobile menu button */}
+            <div className="md:hidden">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              >
+                {isMobileMenuOpen ? (
+                  <X className="h-6 w-6" />
+                ) : (
+                  <Menu className="h-6 w-6" />
+                )}
+              </Button>
+            </div>
+          </div>
+
+          {/* Mobile Navigation */}
+          {isMobileMenuOpen && (
+            <div className="md:hidden border-t border-gray-200 py-4">
+              <div className="flex flex-col space-y-4">
+                <a
+                  href="#discover"
+                  className="text-gray-700 hover:text-gray-900 font-medium"
+                >
+                  DISCOVER
+                </a>
+                <a
+                  href="#categories"
+                  className="text-gray-700 hover:text-gray-900 font-medium"
+                >
+                  BROWSE CATEGORIES
+                </a>
+                <a
+                  href="#create"
+                  className="text-gray-700 hover:text-gray-900 font-medium"
+                >
+                  CREATE DP BANNER
+                </a>
+                <a
+                  href="/#"
+                  className="text-gray-700 hover:text-gray-900 font-medium"
+                >
+                  Help
+                </a>
+                {!isLoggedIn ? (
+                  <div className="flex space-x-2 pt-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setAuthMode("login");
+                        setIsAuthModalOpen(true);
+                        setIsMobileMenuOpen(false);
+                      }}
+                    >
+                      LOGIN
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        setAuthMode("register");
+                        setIsAuthModalOpen(true);
+                        setIsMobileMenuOpen(false);
+                      }}
+                    >
+                      REGISTER
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="pt-2">
+                    <UserDropdown user={user} onLogout={handleLogout} />
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </header>
+      <div className="bg-sky-100 border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <Button variant="ghost" className="mb-4">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Browse
+            Back to More
           </Button>
         </div>
       </div>
@@ -140,7 +304,7 @@ export default function CampaignDetailPage() {
           {/* Left Sidebar - Campaign Info */}
           <div className="lg:col-span-1">
             <Card className="sticky top-4">
-              <CardContent className="p-6">
+              <CardContent className="p-6  bg-sky-100">
                 {/* Campaign Badge */}
                 <div className="flex items-center gap-2 mb-4">
                   <Badge variant="secondary" className="bg-blue-100 text-blue-800">
@@ -215,8 +379,8 @@ export default function CampaignDetailPage() {
                       Facebook
                     </Button>
                     <Button size="sm" variant="outline" onClick={() => handleShare("twitter")} className="flex-1">
-                      <Twitter className="h-4 w-4 mr-1" />
-                      Twitter
+                      <X className="h-4 w-4 mr-1" />
+                      Twitter 
                     </Button>
                     <Button size="sm" variant="outline" onClick={() => handleShare("linkedin")} className="flex-1">
                       <Linkedin className="h-4 w-4 mr-1" />
@@ -270,12 +434,12 @@ export default function CampaignDetailPage() {
                     {isGenerating ? (
                       <>
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        Generating your DP...
+                        Generating your banner graphic...
                       </>
                     ) : (
                       <>
                         <Download className="h-5 w-5 mr-2" />
-                        Generate my DP
+                        Generate my banner
                       </>
                     )}
                   </Button>
@@ -295,7 +459,7 @@ export default function CampaignDetailPage() {
 
                 {/* Help Text */}
                 <p className="text-xs text-gray-500 text-center">
-                  Not sure how to create your personalized DP?{" "}
+                  Not sure how to create your personalized graphic?{" "}
                   <a href="#" className="text-blue-600 hover:underline">
                     View tutorial
                   </a>
