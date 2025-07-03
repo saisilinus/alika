@@ -55,7 +55,7 @@ export async function createUser(
   const now = new Date();
   const user: Omit<User, "_id"> = {
     ...userData,
-    email: userData.email.toLowerCase(),
+    email: userData.email?.toLowerCase(),
     createdAt: now,
     updatedAt: now,
   };
@@ -194,4 +194,13 @@ export async function initializeDatabase(): Promise<void> {
   await db.collection("comments").createIndex({ campaignId: 1 });
   await db.collection("comments").createIndex({ parentId: 1 });
   await db.collection("comments").createIndex({ createdAt: -1 });
+}
+
+// Utility functions
+export function isValidObjectId(id: string): boolean {
+  return ObjectId.isValid(id);
+}
+
+export function createObjectId(id?: string): ObjectId {
+  return id ? new ObjectId(id) : new ObjectId();
 }
