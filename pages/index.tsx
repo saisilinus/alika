@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Inter } from "next/font/google";
-import client from "@/lib/mongodb";
+import mongoClient from "@/lib/mongodb";
 import type { InferGetServerSidePropsType, GetServerSideProps } from "next";
 
 type ConnectionStatus = {
@@ -14,7 +14,7 @@ export const getServerSideProps: GetServerSideProps<
   ConnectionStatus
 > = async () => {
   try {
-    await client.connect(); // `await client.connect()` will use the default database passed in the MONGODB_URI
+    await mongoClient; // `await mongoClient` will use the default database passed in the MONGODB_URI
     return {
       props: { isConnected: true },
     };
