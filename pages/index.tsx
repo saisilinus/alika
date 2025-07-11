@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Eye, Calendar, ArrowRight, Menu, X, Search, Rocket, TrendingUp, LayoutGrid, Star, ChevronRight } from "lucide-react";
+import { Eye, Type, Share2, Settings, Rocket, TrendingUp, LayoutGrid, Star, ChevronRight, Upload,UserCircle } from "lucide-react";
 import AuthModal from "@/components/auth-modal";
 import UserDropdown from "@/components/user-dropdown";
 import Link from "next/link";
@@ -390,27 +390,27 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">How Alika Works</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Create stunning campaigns in just a few simple steps
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Create stunning dp banners for your campaigns & events in just a few simple steps
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
-                title: "Create Your Campaign",
-                description: "Choose from beautiful templates or start from scratch with our easy-to-use editor.",
-                icon: <Rocket className="w-8 h-8 text-blue-600" />
-              },
-              {
-                title: "Customize & Brand",
-                description: "Add your logo, colors, and messaging to make it uniquely yours.",
-                icon: <LayoutGrid className="w-8 h-8 text-blue-600" />
-              },
-              {
-                title: "Share & Engage",
-                description: "Publish and share across social media to reach your audience.",
-                icon: <TrendingUp className="w-8 h-8 text-blue-600" />
-              }
+          title: "Upload Frame",
+          description: "Upload your banner cover image with placeholders for avatars and name",
+          icon: <Upload className="w-8 h-8 text-blue-600" />
+        },
+        {
+          title: "Configure Banner",
+          description: "Customize avatar shape, size, position and name styling to match your brand",
+          icon: <Settings className="w-8 h-8 text-blue-600" />
+        },
+        {
+          title: "Publish & Share",
+          description: "Get a shortened URL to instantly share your professional banner",
+          icon: <Share2 className="w-8 h-8 text-blue-600" />
+        }
             ].map((step, index) => (
               <div key={index} className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
                 <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mb-4">
@@ -423,6 +423,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
 
       {/* Browse by Category Section */}
       <section id="categories" className="py-16 bg-white">
