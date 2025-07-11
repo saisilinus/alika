@@ -127,7 +127,7 @@ const categories = [
   { name: "Food", image: "/placeholder.svg?height=150&width=200", count: 19 },
 ];
 
-export default function HomePage() {
+export default function RecentsPage() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "register">("login");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
