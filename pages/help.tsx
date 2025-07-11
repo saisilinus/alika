@@ -214,19 +214,21 @@ export default function HelpPage() {
     <div className="min-h-screen bg-white">
       {/* Header */}
       <Header/>
-      
 
       {/* Hero Section */}
-      
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">How can we help you?</h1>
-            <p className="text-xl text-blue-100">Find answers, get support, and learn how to maximize your campaign's impact</p>
-            <br></br>
-          </div>
+      <section className="relative bg-gradient-to-r from-blue-600 to-purple-700 text-white py-20 lg:py-16">
+        <div className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20" style={{backgroundImage: 'url("/flow.jpg")'}}></div>
+        <div className="absolute inset-0 bg-black opacity-20"></div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 className="text-4xl md:text-6xl font-bold mb-6">
+            How can we help you?
+          </h1>
+          <p className="text-xl md:text-2xl mb-8 text-gray-100">
+            Find answers, get support, and learn how to maximize your campaign's impact
+          </p>
+          <br></br>
         </div>
-      </div>
+      </section>
      
 
       {/* Search Section */}

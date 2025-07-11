@@ -158,7 +158,6 @@ export default function HomePage() {
      <Header/>
 
       {/* Hero Section */}
-      {/* <section className="relative bg-gradient-to-r from-blue-600 to-purple-700 text-white py-20 lg:py-32"> */}
       <section className="relative bg-gradient-to-r from-blue-600 to-purple-700 text-white py-20 lg:py-16">
         <div className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20" style={{backgroundImage: 'url("/flow.jpg")'}}></div>
         <div className="absolute inset-0 bg-black opacity-20"></div>
@@ -174,14 +173,8 @@ export default function HomePage() {
       </section>
 
       {/* Recent Banners Section */}
-      <section id="discover" className="py-16 bg-gray-50">
+      <section id="discover" className="py-12 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900">
-              Recent Campaigns & Events
-            </h2>
-            
-          </div> */}
   
           {banners.map((banner) => (
               <Link href={`/campaign/${banner.id}`} key={banner.id}>
