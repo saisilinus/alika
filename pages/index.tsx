@@ -241,11 +241,15 @@ export default function HomePage() {
           <div className="inline-flex items-center bg-blue-500/20 px-4 py-2 rounded-full text-sm font-medium mb-4">
             <Rocket className="mr-2 h-4 w-4" /> Welcome to the future of campaigns
           </div>
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-            Let Your Audience <span className="text-blue-300">Champion</span> Your Cause
+          
+          <h1 className="text-3xl md:text-6xl font-bold mb-6 leading-tight">
+          <span className="text-orange-500">Invite</span> Your{' '}
+          <span className="text-green-500">Audience</span> To<br />
+          <span className="text-purple-500">Champion</span> Your{' '}
+          <span className="text-orange-500">Cause</span>
           </h1>
           <p className="text-xl md:text-2xl mb-8 text-blue-100 max-w-3xl mx-auto">
-            Everything you need to build unstoppable momentum for your campaign or event
+            Everything you need to build<br></br> unstoppable momentum for your campaign or event
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button

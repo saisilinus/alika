@@ -12,8 +12,10 @@ export default function Footer() {
               <h3 className="text-xl font-bold">Alika</h3>
             </div>
             <p className="text-gray-400 mb-4">
-              Let your audiences champion your cause with beautiful, effective campaigns.
+              Let your audiences champion your cause with beautiful, effective campaigns.<br></br>
+              <b>Alika</b> means <b>Invite</b> in swahili
             </p>
+           
             <div className="flex space-x-4">
               {['Twitter', 'Facebook', 'Instagram', 'LinkedIn'].map((social) => (
                 <a key={social} href="#" className="text-gray-400 hover:text-white transition-colors">
