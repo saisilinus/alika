@@ -258,7 +258,7 @@ export default function HomePage() {
             >
               Get Started - It's Free
             </Button>
-            <Link href="/recents">
+            <Link href="#discover">
               <Button
                 size="lg"
                 variant="outline"
@@ -268,28 +268,7 @@ export default function HomePage() {
               </Button>
             </Link>
           </div>
-          <div className="mt-12 flex justify-center">
-            <div className="flex -space-x-4">
-              {[1, 2, 3, 4].map((i) => (
-                <Avatar key={i} className="border-2 border-white">
-                  <AvatarImage src={`/avatar${i}.jpg`} />
-                  <AvatarFallback>U{i}</AvatarFallback>
-                </Avatar>
-              ))}
-              <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center text-black text-xs font-bold border-2 border-white">
-                500+
-              </div>
-            </div>
-            <div className="ml-4 text-left">
-              <p className="text-sm text-blue-100">Trusted by thousands of organizers</p>
-              <div className="flex items-center mt-1">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                ))}
-                <span className="ml-2 text-sm text-blue-100">5.0 (2K+ reviews)</span>
-              </div>
-            </div>
-          </div>
+          
         </div>
       </section>
 
@@ -297,7 +276,7 @@ export default function HomePage() {
       <section className="py-12 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8">
-            <p className="text-gray-500 uppercase text-sm font-medium">Trusted by innovative teams</p>
+            <p className="text-gray-500 text-sm font-medium">Trusted by innovative organizers </p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 items-center">
             {['TechCorp', 'UniEvents', 'StartupHub', 'MusicFest', 'EduNetwork', 'BizConnect'].map((logo) => (
