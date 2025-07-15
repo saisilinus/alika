@@ -4,6 +4,7 @@ import GoogleProvider from "next-auth/providers/google";
 import EmailProvider from "next-auth/providers/email";
 import clientPromise from "./mongodb";
 import { findUserByEmail, createUser, updateUser } from "./database";
+import { refreshGoogleAccessToken } from "./refreshAccessToken";
 
 export const authOptions: NextAuthOptions = {
   adapter: MongoDBAdapter(clientPromise),
@@ -11,6 +12,13 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      authorization: {
+        params: {
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code",
+        },
+      },
     }),
     EmailProvider({
       server: {
@@ -29,65 +37,79 @@ export const authOptions: NextAuthOptions = {
       if (!user.email) return false;
 
       try {
-        // Check if user exists
-        let existingUser = await findUserByEmail(user.email);
+        const existingUser = await findUserByEmail(user.email);
 
-        if (!existingUser) {
-          // Create new user with default role
-          existingUser = await createUser({
-            name: user.name || "",
-            email: user.email,
-            image: user.image || "",
-            role: "user",
-            isActive: true,
-          });
-        } else {
-          // Update user info if needed
+        // Optionally: sync profile fields to your user document
+        if (existingUser) {
           const updates: any = {};
-          if (user.name && user.name !== existingUser.name) {
+          if (user.name && user.name !== existingUser.name)
             updates.name = user.name;
-          }
-          if (user.image && user.image !== existingUser.image) {
+          if (user.image && user.image !== existingUser.avatar)
             updates.image = user.image;
-          }
-
           if (Object.keys(updates).length > 0) {
             await updateUser(existingUser._id!.toString(), updates);
           }
         }
-
         return true;
       } catch (error) {
         console.error("Sign in error:", error);
         return false;
       }
     },
-    async session({ session, token }) {
-      if (session.user?.email) {
-        const user = await findUserByEmail(session.user.email);
-        if (user) {
-          session.user.id = user._id!.toString();
-          session.user.role = user.role;
-          session.user.isActive = user.isActive;
+    async jwt({ token, account, user }) {
+      // Initial sign-in
+      if (account && user) {
+        token.provider = account.provider;
+
+        if (account.provider === "google") {
+          token.accessToken = account.access_token;
+          token.refreshToken = account.refresh_token;
+          token.accessTokenExpires =
+            Date.now() + (account.expires_at as number) * 1000;
         }
+
+        return token;
       }
+
+      // If token is not for Google, return as-is
+      if (token.provider !== "google") {
+        return token;
+      }
+
+      // If token still valid, return it
+      if (Date.now() < (token.accessTokenExpires as number)) {
+        return token;
+      }
+
+      // Access token expired, refresh it
+      return await refreshGoogleAccessToken(token);
+    },
+    async session({ session, token }) {
+      session.accessToken = token.accessToken as string | undefined;
+      session.provider = token.provider as string;
+      session.error = token.error as string | undefined;
       return session;
     },
-    async jwt({ token, user }) {
-      if (user) {
-        token.role = user.role;
-      }
-      return token;
+  },
+  events: {
+    async createUser({ user }) {
+      await updateUser(user.id, {
+        role: "user",
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
     },
   },
   pages: {
-    signIn: "/auth/signin",
+    // signIn: "/auth/signin",
     error: "/auth/error",
   },
   session: {
     strategy: "jwt",
   },
   secret: process.env.NEXTAUTH_SECRET,
+  debug: true,
 };
 
 declare module "next-auth" {
@@ -100,6 +122,9 @@ declare module "next-auth" {
       role: "user" | "admin" | "moderator";
       isActive: boolean;
     };
+    accessToken?: string;
+    error?: string;
+    provider?: string;
   }
 
   interface User {
@@ -111,5 +136,10 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
   interface JWT {
     role: "user" | "admin" | "moderator";
+    accessToken?: string;
+    refreshToken?: string;
+    accessTokenExpires?: number;
+    error?: string;
+    provider?: string;
   }
 }

@@ -1,346 +1,429 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Separator } from "@/components/ui/separator"
-import { Eye, Calendar, Facebook, Twitter, Linkedin, Download, ArrowLeft } from "lucide-react"
-import PhotoUpload from "@/components/photo-upload"
-import BannerPreview from "@/components/banner-preview"
-import CommentsSection from "@/components/comments-section"
-
-// Mock campaign data - replace with real API call
-const campaignData = {
-  id: 1,
-  title: "Cracking the Code 1.0",
-  description:
-    "University Life Career Launch & Beyond - Join us for an intensive workshop designed to help students transition from university life to successful careers. This comprehensive program covers resume building, interview skills, networking strategies, and industry insights from leading professionals.",
-  category: "Education",
-  creator: {
-    name: "Tech University",
-    avatar: "/placeholder.svg?height=40&width=40",
-    verified: true,
-  },
-  viewCount: 1250,
-  downloadCount: 890,
-  createdAt: "2024-01-15",
-  templateUrl: "/placeholder.svg?height=400&width=600",
-  placeholderConfig: {
-    photoArea: { x: 450, y: 150, width: 120, height: 120, shape: "circle" },
-    textArea: { x: 200, y: 300, width: 200, height: 40 },
-  },
-  tags: ["Education", "Career", "University", "Workshop"],
-  isTrending: true,
-}
-
-const trendingCampaigns = [
-  {
-    id: 2,
-    title: "Summer Music Festival",
-    thumbnail: "/placeholder.svg?height=150&width=200",
-    viewCount: 890,
-    category: "Music",
-  },
-  {
-    id: 3,
-    title: "Tech Conference 2024",
-    thumbnail: "/placeholder.svg?height=150&width=200",
-    viewCount: 2100,
-    category: "Technology",
-  },
-  {
-    id: 4,
-    title: "Business Networking",
-    thumbnail: "/placeholder.svg?height=150&width=200",
-    viewCount: 650,
-    category: "Business",
-  },
-  {
-    id: 5,
-    title: "Art Exhibition",
-    thumbnail: "/placeholder.svg?height=150&width=200",
-    viewCount: 420,
-    category: "Art",
-  },
-]
+import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Loading } from "@/components/ui/loading";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Eye,
+  Download,
+  Heart,
+  Share2,
+  Calendar,
+  User,
+  Tag,
+  Sparkles,
+  ArrowLeft,
+  ExternalLink,
+} from "lucide-react";
+import {
+  useGetCampaignByIdQuery,
+  useTrackCampaignViewMutation,
+  useGenerateBannerMutation,
+  useGetSimilarCampaignsQuery,
+} from "@/features";
+import BannerPreview from "@/components/banner-preview";
+import CommentsSection from "@/components/comments-section";
+import PhotoUpload from "@/components/photo-upload";
 
 export default function CampaignDetailPage() {
-  const [userName, setUserName] = useState("")
-  const [userPhoto, setUserPhoto] = useState<string | null>(null)
-  const [isPublic, setIsPublic] = useState(false)
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [newComment, setNewComment] = useState("")
+  const params = useParams();
+  const campaignId = params?.id as string;
+  const { toast } = useToast();
+
+  // State for banner customization
+  const [userName, setUserName] = useState("");
+  const [userPhoto, setUserPhoto] = useState<string | null>(null);
+  const [generatedBanner, setGeneratedBanner] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  // RTK Query hooks
+  const {
+    data: campaign,
+    isLoading,
+    error,
+  } = useGetCampaignByIdQuery(campaignId);
+  const { data: similarCampaigns } = useGetSimilarCampaignsQuery({
+    campaignId,
+    limit: 4,
+  });
+  const [trackView] = useTrackCampaignViewMutation();
+  const [generateBanner] = useGenerateBannerMutation();
+
+  // Track view when component mounts
+  useEffect(() => {
+    if (campaignId) {
+      trackView(campaignId);
+    }
+  }, [campaignId, trackView]);
 
   const handlePhotoUpload = (photoUrl: string) => {
-    setUserPhoto(photoUrl)
-  }
+    setUserPhoto(photoUrl);
+  };
 
   const handleGenerateBanner = async () => {
     if (!userName.trim()) {
-      alert("Please enter your name")
-      return
+      toast({
+        variant: "destructive",
+        title: "Name required",
+        description: "Please enter your name to generate the banner.",
+      });
+      return;
     }
 
-    setIsGenerating(true)
-
-    // Simulate banner generation
+    setIsGenerating(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 3000))
+      const result = await generateBanner({
+        campaignId,
+        customizations: {
+          text: userName,
+          photo: userPhoto as string,
+        },
+      }).unwrap();
 
-      // In real implementation, this would call the backend API
-      const generatedBannerUrl = `/generated/banner-${Date.now()}.png`
-
-      // Trigger download
-      const link = document.createElement("a")
-      link.href = generatedBannerUrl
-      link.download = `${campaignData.title.toLowerCase().replace(/\s+/g, "-")}-${userName.toLowerCase().replace(/\s+/g, "-")}.png`
-      link.click()
-
-      alert("Banner generated successfully!")
+      setGeneratedBanner(result.imageUrl);
+      toast({
+        title: "Banner generated successfully!",
+        description: "Your personalized banner is ready for download.",
+      });
     } catch (error) {
-      alert("Failed to generate banner. Please try again.")
+      console.error("Banner generation error:", error);
+      toast({
+        variant: "destructive",
+        title: "Generation failed",
+        description: "Failed to generate banner. Please try again.",
+      });
     } finally {
-      setIsGenerating(false)
+      setIsGenerating(false);
     }
+  };
+
+  const handleDownloadBanner = () => {
+    if (generatedBanner) {
+      const link = document.createElement("a");
+      link.href = generatedBanner;
+      link.download = `${campaign?.title || "banner"}-${userName}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast({
+        title: "Download started",
+        description: "Your banner is being downloaded.",
+      });
+    }
+  };
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: campaign?.title,
+          text: campaign?.description,
+          url: window.location.href,
+        });
+      } catch (error) {
+        console.log("Share cancelled");
+      }
+    } else {
+      // Fallback: copy to clipboard
+      navigator.clipboard.writeText(window.location.href);
+      toast({
+        title: "Link copied",
+        description: "Campaign link copied to clipboard.",
+      });
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <Loading text="Loading campaign..." />
+        </div>
+      </div>
+    );
   }
 
-  const handleShare = (platform: string) => {
-    const url = window.location.href
-    const text = `Check out this amazing campaign: ${campaignData.title}`
-
-    const shareUrls = {
-      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
-      twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
-      linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
-    }
-
-    if (shareUrls[platform as keyof typeof shareUrls]) {
-      window.open(shareUrls[platform as keyof typeof shareUrls], "_blank", "width=600,height=400")
-    }
+  if (error || !campaign) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            Campaign not found
+          </h1>
+          <p className="text-gray-600 mb-4">
+            The campaign you're looking for doesn't exist.
+          </p>
+          <Button onClick={() => window.history.back()}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Go Back
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <Button variant="ghost" className="mb-4">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Browse
-          </Button>
+      <header className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <Button variant="ghost" onClick={() => window.history.back()}>
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </Button>
+            <div className="flex items-center space-x-4">
+              <Button variant="outline" onClick={handleShare}>
+                <Share2 className="w-4 h-4 mr-2" />
+                Share
+              </Button>
+            </div>
+          </div>
         </div>
-      </div>
+      </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Sidebar - Campaign Info */}
-          <div className="lg:col-span-1">
-            <Card className="sticky top-4">
-              <CardContent className="p-6">
-                {/* Campaign Badge */}
-                <div className="flex items-center gap-2 mb-4">
-                  <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                    {campaignData.category}
-                  </Badge>
-                  {campaignData.isTrending && (
-                    <Badge variant="secondary" className="bg-red-100 text-red-800">
-                      Trending
-                    </Badge>
-                  )}
-                </div>
-
-                {/* Campaign Title */}
-                <h1 className="text-2xl font-bold text-gray-900 mb-4">{campaignData.title}</h1>
-
-                {/* Creator Info */}
-                <div className="flex items-center space-x-3 mb-4">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src={campaignData.creator.avatar || "/placeholder.svg"} />
-                    <AvatarFallback>{campaignData.creator.name[0]}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-medium text-gray-900">{campaignData.creator.name}</p>
-                    <p className="text-sm text-gray-500">Campaign Creator</p>
-                  </div>
-                </div>
-
-                {/* Stats */}
-                <div className="flex items-center space-x-6 mb-6 text-sm text-gray-500">
-                  <div className="flex items-center">
-                    <Eye className="h-4 w-4 mr-1" />
-                    {campaignData.viewCount.toLocaleString()} views
-                  </div>
-                  <div className="flex items-center">
-                    <Download className="h-4 w-4 mr-1" />
-                    {campaignData.downloadCount} downloads
-                  </div>
-                  <div className="flex items-center">
-                    <Calendar className="h-4 w-4 mr-1" />
-                    {new Date(campaignData.createdAt).toLocaleDateString()}
-                  </div>
-                </div>
-
-                <Separator className="my-6" />
-
-                {/* Description */}
-                <div className="mb-6">
-                  <h3 className="font-semibold text-gray-900 mb-2">About this Campaign</h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">{campaignData.description}</p>
-                </div>
-
-                {/* Tags */}
-                <div className="mb-6">
-                  <h3 className="font-semibold text-gray-900 mb-2">Tags</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {campaignData.tags.map((tag) => (
-                      <Badge key={tag} variant="outline" className="text-xs">
-                        {tag}
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Campaign Info */}
+            <Card>
+              <CardContent className="p-0">
+                <div className="aspect-video relative rounded-t-lg overflow-hidden">
+                  <img
+                    src={
+                      campaign.templateUrl ||
+                      campaign.imageUrl ||
+                      "/placeholder.svg"
+                    }
+                    alt={campaign.title}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                  <div className="absolute bottom-4 left-4 right-4">
+                    <div className="flex items-center justify-between">
+                      <Badge className="bg-white/20 text-white border-white/30">
+                        {campaign.category}
                       </Badge>
-                    ))}
+                      <div className="flex items-center space-x-4 text-white text-sm">
+                        <div className="flex items-center">
+                          <Eye className="w-4 h-4 mr-1" />
+                          {campaign.viewCount?.toLocaleString() || 0}
+                        </div>
+                        <div className="flex items-center">
+                          <Download className="w-4 h-4 mr-1" />
+                          {campaign.downloadCount?.toLocaleString() || 0}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-
-                <Separator className="my-6" />
-
-                {/* Social Sharing */}
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-3">Share this Campaign</h3>
-                  <div className="flex space-x-2">
-                    <Button size="sm" variant="outline" onClick={() => handleShare("facebook")} className="flex-1">
-                      <Facebook className="h-4 w-4 mr-1" />
-                      Facebook
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={() => handleShare("twitter")} className="flex-1">
-                      <Twitter className="h-4 w-4 mr-1" />
-                      Twitter
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={() => handleShare("linkedin")} className="flex-1">
-                      <Linkedin className="h-4 w-4 mr-1" />
-                      LinkedIn
+                <div className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                        {campaign.title}
+                      </h1>
+                      <p className="text-gray-600 text-lg">
+                        {campaign.description}
+                      </p>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      <Heart className="w-4 h-4" />
                     </Button>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
 
-          {/* Right Main Area - Banner Customization */}
-          <div className="lg:col-span-2">
-            <Card className="mb-8">
-              <CardContent className="p-6">
-                {/* Banner Preview */}
-                <div className="mb-6">
-                  <BannerPreview
-                    templateUrl={campaignData.templateUrl}
-                    userPhoto={userPhoto}
-                    userName={userName}
-                    placeholderConfig={campaignData.placeholderConfig}
-                  />
-                </div>
+                  <div className="flex items-center space-x-6 text-sm text-gray-500 mb-6">
+                    <div className="flex items-center">
+                      <User className="w-4 h-4 mr-1" />
+                      {campaign.creator?.name || "Anonymous"}
+                    </div>
+                    <div className="flex items-center">
+                      <Calendar className="w-4 h-4 mr-1" />
+                      {new Date(campaign.createdAt).toLocaleDateString()}
+                    </div>
+                  </div>
 
-                {/* Photo Upload */}
-                <div className="mb-6">
-                  <h3 className="font-semibold text-gray-900 mb-3">Upload Your Photo</h3>
-                  <PhotoUpload onPhotoUpload={handlePhotoUpload} />
-                </div>
+                  {campaign.tags && campaign.tags.length > 0 && (
+                    <div className="flex items-center space-x-2 mb-6">
+                      <Tag className="w-4 h-4 text-gray-400" />
+                      <div className="flex flex-wrap gap-2">
+                        {campaign.tags.map((tag, index) => (
+                          <Badge
+                            key={index}
+                            variant="secondary"
+                            className="text-xs"
+                          >
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
-                {/* Name Input */}
-                <div className="mb-6">
-                  <h3 className="font-semibold text-gray-900 mb-3">Your Name</h3>
-                  <Input
-                    placeholder="Enter your name"
-                    value={userName}
-                    onChange={(e) => setUserName(e.target.value)}
-                    className="text-lg"
-                  />
-                </div>
+                  <Separator className="my-6" />
 
-                {/* Generate Button */}
-                <div className="mb-6">
-                  <Button
-                    onClick={handleGenerateBanner}
-                    disabled={isGenerating || !userName.trim()}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white py-3 text-lg font-semibold"
-                    size="lg"
-                  >
-                    {isGenerating ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        Generating your DP...
-                      </>
-                    ) : (
-                      <>
-                        <Download className="h-5 w-5 mr-2" />
-                        Generate my DP
-                      </>
-                    )}
-                  </Button>
+                  <div className="prose max-w-none">
+                    <h3 className="text-lg font-semibold mb-3">
+                      About this template
+                    </h3>
+                    <p className="text-gray-600">
+                      This template is perfect for creating professional banners
+                      for your campaigns. Customize it with your own photo and
+                      text to make it uniquely yours.
+                    </p>
+                  </div>
                 </div>
-
-                {/* Public Display Checkbox */}
-                <div className="flex items-center space-x-2 mb-4">
-                  <Checkbox
-                    id="public"
-                    checked={isPublic}
-                    onCheckedChange={(checked) => setIsPublic(checked as boolean)}
-                  />
-                  <label htmlFor="public" className="text-sm text-gray-600">
-                    Display my name and campaign publicly
-                  </label>
-                </div>
-
-                {/* Help Text */}
-                <p className="text-xs text-gray-500 text-center">
-                  Not sure how to create your personalized DP?{" "}
-                  <a href="#" className="text-blue-600 hover:underline">
-                    View tutorial
-                  </a>
-                </p>
               </CardContent>
             </Card>
 
             {/* Comments Section */}
-            <CommentsSection campaignId={campaignData.id} />
+            <CommentsSection campaignId={campaignId} />
+          </div>
 
-            {/* Trending Section */}
-            <Card className="mt-8">
-              <CardContent className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-4">Similar Campaigns</h3>
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                  {trendingCampaigns.map((campaign) => (
-                    <Card
-                      key={campaign.id}
-                      className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
-                    >
-                      <div className="aspect-video relative">
-                        <img
-                          src={campaign.thumbnail || "/placeholder.svg"}
-                          alt={campaign.title}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <CardContent className="p-3">
-                        <h4 className="font-medium text-sm mb-1 line-clamp-2">{campaign.title}</h4>
-                        <div className="flex items-center justify-between text-xs text-gray-500">
-                          <span>{campaign.category}</span>
-                          <div className="flex items-center">
-                            <Eye className="h-3 w-3 mr-1" />
-                            {campaign.viewCount}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Banner Generator */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Sparkles className="w-5 h-5 mr-2" />
+                  Generate Your Banner
+                </CardTitle>
+                <CardDescription>
+                  Personalize this template with your own content
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div>
+                  <Label htmlFor="userName">Your Name</Label>
+                  <Input
+                    id="userName"
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                    placeholder="Enter your name"
+                    className="mt-1"
+                  />
+                </div>
+
+                <PhotoUpload
+                  onPhotoUpload={handlePhotoUpload}
+                  onPhotoSelect={setUserPhoto}
+                  currentPhoto={userPhoto}
+                />
+
+                <Button
+                  onClick={handleGenerateBanner}
+                  disabled={isGenerating || !userName.trim()}
+                  className="w-full"
+                >
+                  {isGenerating ? "Generating..." : "Generate Banner"}
+                </Button>
+
+                {generatedBanner && (
+                  <div className="space-y-4">
+                    <img
+                      src={generatedBanner || "/placeholder.svg"}
+                      alt="Generated banner"
+                      className="w-full h-full object-cover"
+                    />
+                    <Button onClick={handleDownloadBanner} className="w-full">
+                      <Download className="w-4 h-4 mr-2" />
+                      Download Banner
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Campaign Stats */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Campaign Stats</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Total Views</span>
+                  <span className="font-semibold">
+                    {campaign.viewCount?.toLocaleString() || 0}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Downloads</span>
+                  <span className="font-semibold">
+                    {campaign.downloadCount?.toLocaleString() || 0}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Category</span>
+                  <Badge variant="secondary">{campaign.category}</Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Created</span>
+                  <span className="text-sm">
+                    {new Date(campaign.createdAt).toLocaleDateString()}
+                  </span>
                 </div>
               </CardContent>
             </Card>
+
+            {/* Similar Campaigns */}
+            {similarCampaigns && similarCampaigns.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Similar Templates</CardTitle>
+                  <CardDescription>You might also like these</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {similarCampaigns.map((similar) => (
+                    <div
+                      key={similar._id?.toString()}
+                      className="flex items-center space-x-3"
+                    >
+                      <img
+                        src={
+                          similar.templateUrl ||
+                          similar.imageUrl ||
+                          "/placeholder.svg"
+                        }
+                        alt={similar.title}
+                        className="w-12 h-12 rounded object-cover"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">
+                          {similar.title}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {similar.category}
+                        </p>
+                      </div>
+                      <Button variant="ghost" size="sm" asChild>
+                        <a href={`/campaign/${similar._id}`}>
+                          <ExternalLink className="w-4 h-4" />
+                        </a>
+                      </Button>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }

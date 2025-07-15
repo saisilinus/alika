@@ -1,164 +1,152 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useRef, useCallback } from "react"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Plus, X, RotateCcw } from "lucide-react"
+import { useState, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Upload, X, ImageIcon } from "lucide-react";
+import { toast } from "sonner";
 
 interface PhotoUploadProps {
-  onPhotoUpload: (photoUrl: string) => void
+  onPhotoUpload: (photoUrl: string) => void;
+  onPhotoSelect?: (photoUrl: string | null) => void;
+  currentPhoto?: string | null;
 }
 
-export default function PhotoUpload({ onPhotoUpload }: PhotoUploadProps) {
-  const [dragActive, setDragActive] = useState(false)
-  const [uploadedPhoto, setUploadedPhoto] = useState<string | null>(null)
-  const [isUploading, setIsUploading] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+export default function PhotoUpload({
+  onPhotoUpload,
+  onPhotoSelect,
+  currentPhoto,
+}: PhotoUploadProps) {
+  const [isUploading, setIsUploading] = useState(false);
+  const [preview, setPreview] = useState<string | null>(currentPhoto || null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleDrag = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true)
-    } else if (e.type === "dragleave") {
-      setDragActive(false)
-    }
-  }, [])
+  const handleFileSelect = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setDragActive(false)
-
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFile(e.dataTransfer.files[0])
-    }
-  }, [])
-
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    e.preventDefault()
-    if (e.target.files && e.target.files[0]) {
-      handleFile(e.target.files[0])
-    }
-  }, [])
-
-  const handleFile = async (file: File) => {
     // Validate file type
     if (!file.type.startsWith("image/")) {
-      alert("Please upload an image file")
-      return
+      toast.error("Please select an image file");
+      return;
     }
 
-    // Validate file size (5MB max)
+    // Validate file size (5MB limit)
     if (file.size > 5 * 1024 * 1024) {
-      alert("File size must be less than 5MB")
-      return
+      toast.error("File size must be less than 5MB");
+      return;
     }
 
-    setIsUploading(true)
+    setIsUploading(true);
 
     try {
-      // Create object URL for preview
-      const objectUrl = URL.createObjectURL(file)
-      setUploadedPhoto(objectUrl)
-      onPhotoUpload(objectUrl)
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        setPreview(result);
+        onPhotoUpload(result);
+        onPhotoSelect?.(result);
+      };
+      reader.readAsDataURL(file);
 
-      // In real implementation, upload to server here
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      toast.success("Photo uploaded successfully!");
     } catch (error) {
-      alert("Failed to upload photo. Please try again.")
+      console.error("Error uploading photo:", error);
+      toast.error("Failed to upload photo");
     } finally {
-      setIsUploading(false)
+      setIsUploading(false);
     }
-  }
+  };
 
-  const handleClick = () => {
-    fileInputRef.current?.click()
-  }
-
-  const handleRemove = () => {
-    setUploadedPhoto(null)
-    onPhotoUpload("")
+  const handleRemovePhoto = () => {
+    setPreview(null);
+    onPhotoSelect?.(null);
     if (fileInputRef.current) {
-      fileInputRef.current.value = ""
+      fileInputRef.current.value = "";
     }
-  }
+  };
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
 
   return (
-    <div className="w-full">
-      <input ref={fileInputRef} type="file" accept="image/*" onChange={handleChange} className="hidden" />
-
-      {!uploadedPhoto ? (
-        <Card
-          className={`relative border-2 border-dashed transition-colors cursor-pointer ${
-            dragActive ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-gray-400"
-          }`}
-          onDragEnter={handleDrag}
-          onDragLeave={handleDrag}
-          onDragOver={handleDrag}
-          onDrop={handleDrop}
-          onClick={handleClick}
-        >
-          <div className="flex flex-col items-center justify-center py-12 px-6">
-            <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-              {isUploading ? (
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-              ) : (
-                <Plus className="h-8 w-8 text-gray-400" />
-              )}
-            </div>
-            <p className="text-lg font-medium text-gray-900 mb-2">
-              {isUploading ? "Uploading..." : "Upload your photo"}
+    <Card className="w-full">
+      <CardContent className="p-6">
+        <div className="space-y-4">
+          <div className="text-center">
+            <h3 className="text-lg font-semibold">Upload Your Photo</h3>
+            <p className="text-sm text-muted-foreground">
+              Add your photo to personalize the banner
             </p>
-            <p className="text-sm text-gray-500 text-center mb-4">Drag and drop your image here, or click to browse</p>
-            <div className="flex items-center space-x-4 text-xs text-gray-400">
-              <span>JPG, PNG, WebP</span>
-              <span>•</span>
-              <span>Max 5MB</span>
-            </div>
           </div>
-        </Card>
-      ) : (
-        <div className="relative">
-          <Card className="overflow-hidden">
-            <div className="aspect-square relative">
-              <img
-                src={uploadedPhoto || "/placeholder.svg"}
-                alt="Uploaded photo"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 transition-all flex items-center justify-center opacity-0 hover:opacity-100">
-                <div className="flex space-x-2">
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleClick()
-                    }}
-                  >
-                    <RotateCcw className="h-4 w-4 mr-1" />
-                    Replace
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleRemove()
-                    }}
-                  >
-                    <X className="h-4 w-4 mr-1" />
-                    Remove
-                  </Button>
-                </div>
+
+          {preview ? (
+            <div className="relative">
+              <div className="aspect-square w-full max-w-xs mx-auto rounded-lg overflow-hidden border-2 border-dashed border-gray-300">
+                <img
+                  src={preview || "/placeholder.svg"}
+                  alt="Preview"
+                  className="w-full h-full object-cover"
+                />
               </div>
+              <Button
+                variant="destructive"
+                size="sm"
+                className="absolute top-2 right-2"
+                onClick={handleRemovePhoto}
+              >
+                <X className="h-4 w-4" />
+              </Button>
             </div>
-          </Card>
+          ) : (
+            <div
+              className="aspect-square w-full max-w-xs mx-auto rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer hover:border-gray-400 transition-colors"
+              onClick={handleUploadClick}
+            >
+              <ImageIcon className="h-12 w-12 text-gray-400 mb-4" />
+              <p className="text-sm text-gray-600 text-center">
+                Click to upload or drag and drop
+              </p>
+              <p className="text-xs text-gray-500 mt-1">PNG, JPG up to 5MB</p>
+            </div>
+          )}
+
+          <div className="flex gap-2">
+            <Button
+              onClick={handleUploadClick}
+              disabled={isUploading}
+              className="flex-1"
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              {isUploading
+                ? "Uploading..."
+                : preview
+                ? "Change Photo"
+                : "Upload Photo"}
+            </Button>
+            {preview && (
+              <Button variant="outline" onClick={handleRemovePhoto}>
+                <X className="h-4 w-4 mr-2" />
+                Remove
+              </Button>
+            )}
+          </div>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileSelect}
+            className="hidden"
+          />
         </div>
-      )}
-    </div>
-  )
+      </CardContent>
+    </Card>
+  );
 }

@@ -15,6 +15,11 @@ export async function connectToDatabase(): Promise<Db> {
   return db;
 }
 
+export async function getDatabase(): Promise<Db> {
+  const client = await clientPromise;
+  return client.db("alika");
+}
+
 export async function getUsersCollection(): Promise<Collection<User>> {
   const db = await connectToDatabase();
   return db.collection<User>("users");
@@ -203,4 +208,8 @@ export function isValidObjectId(id: string): boolean {
 
 export function createObjectId(id?: string): ObjectId {
   return id ? new ObjectId(id) : new ObjectId();
+}
+
+export function toObjectId(id: string): ObjectId {
+  return new ObjectId(id);
 }
