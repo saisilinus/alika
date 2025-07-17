@@ -271,21 +271,21 @@ export default function HomePage() {
                         </Link>
                     </div>
 
-                    {latestLoading ? (
+                    {trendingLoading ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                             {[...Array(4)].map((_, i) => (
                                 <LoadingCard key={i} />
                             ))}
                         </div>
-                    ) : latestError ? (
+                    ) : trendingError ? (
                         <div className="text-center py-8">
                             <p className="text-red-600">
-                                Error loading latest campaigns
+                                Error loading trending campaigns
                             </p>
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {latestCampaigns?.campaigns.map((banner) => (
+                            {trendingCampaigns?.campaigns.map((banner) => (
                                 <Card
                                     key={banner._id?.toString()}
                                     className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
