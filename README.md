@@ -4,8 +4,8 @@
 
 If you want to learn more about MongoDB, visit the following pages:
 
-- [MongoDB Atlas](https://mongodb.com/atlas)
-- [MongoDB Documentation](https://docs.mongodb.com/)
+-   [MongoDB Atlas](https://mongodb.com/atlas)
+-   [MongoDB Documentation](https://docs.mongodb.com/)
 
 ## Deploy your own
 
@@ -27,7 +27,7 @@ cp .env.local.example .env.local
 
 Set each variable on `.env.local`:
 
-- `MONGODB_URI` - Your MongoDB connection string. If you are using [MongoDB Atlas](https://mongodb.com/atlas) you can find this by clicking the "Connect" button for your cluster.
+-   `MONGODB_URI` - Your MongoDB connection string. If you are using [MongoDB Atlas](https://mongodb.com/atlas) you can find this by clicking the "Connect" button for your cluster.
 
 ### Run Next.js in development mode
 
@@ -41,6 +41,14 @@ Your app should be up and running on [http://localhost:3000](http://localhost:30
 You will either see a message stating "You are connected to MongoDB" or "You are NOT connected to MongoDB". Ensure that you have provided the correct `MONGODB_URI` environment variable.
 
 When you are successfully connected, you can refer to the [MongoDB Node.js Driver docs](https://mongodb.github.io/node-mongodb-native/3.4/tutorials/collections/) for further instructions on how to query your database.
+
+#### Seed Database
+
+You can seed the database by running this on the terminal:
+
+```
+node ./scripts/init-database.js
+```
 
 ## Deploy on Vercel
 
