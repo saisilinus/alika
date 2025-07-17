@@ -136,6 +136,8 @@ export default function HomePage() {
     const { data: session } = useSession();
     const isLoggedIn = !!session;
 
+    console.log({ session });
+
     // RTK Query hooks - these return Campaign[] directly
     const {
         data: trendingCampaigns,
@@ -148,8 +150,6 @@ export default function HomePage() {
         isLoading: latestLoading,
         error: latestError,
     } = useGetLatestCampaignsQuery({ limit: 4 });
-
-    console.log({ trendingCampaigns, latestCampaigns });
 
     const handleAuthSuccess = (userData: any) => {
         setIsAuthModalOpen(false);
@@ -665,65 +665,6 @@ export default function HomePage() {
                                     {step.description}
                                 </p>
                             </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* Browse by Category Section */}
-            <section id="categories" className="py-16 bg-white">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-                        <div>
-                            <h2 className="text-3xl font-bold text-gray-900">
-                                Browse by Category
-                            </h2>
-                            <p className="text-gray-600 mt-2">
-                                Find campaigns that match your interests
-                            </p>
-                        </div>
-                        <Link href="/categories">
-                            <Button
-                                variant="ghost"
-                                className="text-blue-600 hover:text-blue-700 group"
-                            >
-                                All Categories{" "}
-                                <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                            </Button>
-                        </Link>
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {categories.map((category) => (
-                            <Link
-                                href={`/categories/${category.name.toLowerCase()}`}
-                                key={category.name}
-                            >
-                                <Card className="overflow-hidden hover:shadow-lg transition-all cursor-pointer group h-full">
-                                    <div className="aspect-square relative">
-                                        <img
-                                            src={
-                                                category.image ||
-                                                "/placeholder.svg"
-                                            }
-                                            alt={category.name}
-                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                                        />
-                                        <div className="absolute inset-0 bg-black/30 flex flex-col justify-end p-3">
-                                            <div className="flex items-center">
-                                                {/* <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center mr-2">
-                          {category.icon}
-                        </div> */}
-                                                <h3 className="text-white font-semibold text-sm">
-                                                    {category.name}
-                                                </h3>
-                                            </div>
-                                            <p className="text-gray-200 text-xs mt-1">
-                                                {category.count} campaigns
-                                            </p>
-                                        </div>
-                                    </div>
-                                </Card>
-                            </Link>
                         ))}
                     </div>
                 </div>
