@@ -248,7 +248,7 @@ export default function HomePage() {
                 </div>
             </section>
 
-            {/* Trending Banners Section */}
+            {/* Trending Banners/campaigns Section */}
             <section id="discover" className="py-16 bg-white">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
@@ -284,7 +284,7 @@ export default function HomePage() {
                             </p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {latestCampaigns?.campaigns.map((banner) => (
                                 <Card
                                     key={banner._id?.toString()}
