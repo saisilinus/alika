@@ -1,5 +1,5 @@
-import api from "@/lib/redux/api";
-import type { Campaign, User } from "@/lib/types";
+import api from '@/lib/redux/api';
+import type { Campaign, User } from '@/lib/types';
 
 export interface AdminStats {
   totalUsers: number;
@@ -14,7 +14,7 @@ export interface AdminStats {
     downloads: number;
   };
   recentActivity?: Array<{
-    type: "user_registered" | "campaign_created" | "banner_generated";
+    type: 'user_registered' | 'campaign_created' | 'banner_generated';
     description: string;
     timestamp: Date;
   }>;
@@ -61,26 +61,26 @@ export interface AdminCampaignsResponse {
 
 export interface UpdateUserRoleRequest {
   userId: string;
-  role: "user" | "admin" | "moderator";
+  role: 'user' | 'admin' | 'moderator';
 }
 
-export interface UpdateCampaignRequest {
-  campaignId: string;
-  updates: Partial<Campaign>;
-}
+// export interface UpdateCampaignRequest {
+//   campaignId: string;
+//   updates: Partial<Campaign>;
+// }
 
 const apiWithAdminTags = api.enhanceEndpoints({
-  addTagTypes: ["AdminStats", "AdminUsers", "AdminCampaigns"],
+  addTagTypes: ['AdminStats', 'AdminUsers', 'AdminCampaigns'],
 });
 
 const adminApi = apiWithAdminTags.injectEndpoints({
   endpoints: (builder) => ({
     getAdminStats: builder.query<AdminStatsResponse, void>({
       query: () => ({
-        url: "admin/stats",
-        method: "GET",
+        url: 'admin/stats',
+        method: 'GET',
       }),
-      providesTags: ["AdminStats"],
+      providesTags: ['AdminStats'],
     }),
 
     getAdminUsers: builder.query<
@@ -88,20 +88,20 @@ const adminApi = apiWithAdminTags.injectEndpoints({
       { page?: number; limit?: number; search?: string }
     >({
       query: (params) => ({
-        url: "admin/users",
-        method: "GET",
+        url: 'admin/users',
+        method: 'GET',
         params,
       }),
       providesTags: (result) =>
         result?.users
           ? [
               ...result.users.map(({ _id }) => ({
-                type: "AdminUsers" as const,
+                type: 'AdminUsers' as const,
                 id: _id?.toString(),
               })),
-              { type: "AdminUsers", id: "PARTIAL-USERS-LIST" },
+              { type: 'AdminUsers', id: 'PARTIAL-USERS-LIST' },
             ]
-          : [{ type: "AdminUsers", id: "PARTIAL-USERS-LIST" }],
+          : [{ type: 'AdminUsers', id: 'PARTIAL-USERS-LIST' }],
     }),
 
     updateUserRole: builder.mutation<
@@ -110,13 +110,13 @@ const adminApi = apiWithAdminTags.injectEndpoints({
     >({
       query: ({ userId, role }) => ({
         url: `admin/users/${userId}/role`,
-        method: "PATCH",
+        method: 'PATCH',
         body: { role },
       }),
       invalidatesTags: (_result, _error, { userId }) => [
-        { type: "AdminUsers", id: userId },
-        { type: "AdminUsers", id: "PARTIAL-USERS-LIST" },
-        "AdminStats",
+        { type: 'AdminUsers', id: userId },
+        { type: 'AdminUsers', id: 'PARTIAL-USERS-LIST' },
+        'AdminStats',
       ],
     }),
   }),

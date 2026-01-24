@@ -1,29 +1,29 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
+import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { redirect, useRouter } from 'next/navigation';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -31,7 +31,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,7 +42,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+} from '@/components/ui/alert-dialog';
 import {
   Table,
   TableBody,
@@ -50,14 +50,14 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/components/ui/chart";
-import { Loading, LoadingSkeleton } from "@/components/ui/loading";
-import { useToast } from "@/hooks/use-toast";
+} from '@/components/ui/chart';
+import { Loading, LoadingSkeleton } from '@/components/ui/loading';
+import { useToast } from '@/hooks/use-toast';
 import {
   Users,
   FileImage,
@@ -69,7 +69,7 @@ import {
   Eye,
   Calendar,
   Shield,
-} from "lucide-react";
+} from 'lucide-react';
 import {
   LineChart,
   Line,
@@ -79,7 +79,7 @@ import {
   ResponsiveContainer,
   BarChart,
   Bar,
-} from "recharts";
+} from 'recharts';
 import {
   useGetAdminStatsQuery,
   useGetAdminUsersQuery,
@@ -88,10 +88,13 @@ import {
   useDeleteCampaignMutation,
   useUpdateUserRoleMutation,
   useGetCampaignsQuery,
-} from "@/features";
+} from '@/features';
 
 export default function AdminDashboard() {
   const { data: session, status } = useSession();
+  console.log({ session });
+  const router = useRouter();
+  const [isAuthorized, setIsAuthorized] = useState(false);
   const { toast } = useToast();
   const [selectedCampaign, setSelectedCampaign] = useState<any>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -130,34 +133,47 @@ export default function AdminDashboard() {
   const campaigns = campaignsResponse?.campaigns;
 
   // Check authentication and authorization
-  if (status === "loading") {
-    return <Loading text="Checking authentication..." />;
-  }
+  useEffect(() => {
+    if (status === 'loading') return;
 
-  if (!session || (session.user as any)?.role !== "admin") {
-    redirect("/");
-  }
+    if (!session) {
+      router.push('/');
+      return;
+    }
+
+    if (session.user?.role !== 'admin') {
+      toast({
+        title: 'Access Denied',
+        description: "You don't have permission to access the admin dashboard.",
+        variant: 'destructive',
+      });
+      router.push('/');
+      return;
+    }
+
+    setIsAuthorized(true);
+  }, [session, status, router, toast]);
 
   const handleCreateCampaign = async (formData: FormData) => {
     try {
       const campaignData = {
-        title: formData.get("title") as string,
-        description: formData.get("description") as string,
-        category: formData.get("category") as string,
-        tags: (formData.get("tags") as string)
-          .split(",")
+        title: formData.get('title') as string,
+        description: formData.get('description') as string,
+        category: formData.get('category') as string,
+        tags: (formData.get('tags') as string)
+          .split(',')
           .map((tag) => tag.trim()),
-        imageUrl: formData.get("imageUrl") as string,
+        imageUrl: formData.get('imageUrl') as string,
       };
 
       await createCampaign(campaignData).unwrap();
-      toast({ title: "Campaign created successfully!" });
+      toast({ title: 'Campaign created successfully!' });
       setIsCreateDialogOpen(false);
     } catch (error) {
       toast({
-        variant: "destructive",
-        title: "Error creating campaign",
-        description: "Please try again later.",
+        variant: 'destructive',
+        title: 'Error creating campaign',
+        description: 'Please try again later.',
       });
     }
   };
@@ -169,25 +185,25 @@ export default function AdminDashboard() {
       const campaignData = {
         id: selectedCampaign._id,
         updates: {
-          title: formData.get("title") as string,
-          description: formData.get("description") as string,
-          category: formData.get("category") as string,
-          tags: (formData.get("tags") as string)
-            .split(",")
+          title: formData.get('title') as string,
+          description: formData.get('description') as string,
+          category: formData.get('category') as string,
+          tags: (formData.get('tags') as string)
+            .split(',')
             .map((tag) => tag.trim()),
-          imageUrl: formData.get("imageUrl") as string,
+          imageUrl: formData.get('imageUrl') as string,
         },
       };
 
       await updateCampaign(campaignData).unwrap();
-      toast({ title: "Campaign updated successfully!" });
+      toast({ title: 'Campaign updated successfully!' });
       setIsEditDialogOpen(false);
       setSelectedCampaign(null);
     } catch (error) {
       toast({
-        variant: "destructive",
-        title: "Error updating campaign",
-        description: "Please try again later.",
+        variant: 'destructive',
+        title: 'Error updating campaign',
+        description: 'Please try again later.',
       });
     }
   };
@@ -195,12 +211,12 @@ export default function AdminDashboard() {
   const handleDeleteCampaign = async (campaignId: string) => {
     try {
       await deleteCampaign(campaignId).unwrap();
-      toast({ title: "Campaign deleted successfully!" });
+      toast({ title: 'Campaign deleted successfully!' });
     } catch (error) {
       toast({
-        variant: "destructive",
-        title: "Error deleting campaign",
-        description: "Please try again later.",
+        variant: 'destructive',
+        title: 'Error deleting campaign',
+        description: 'Please try again later.',
       });
     }
   };
@@ -209,14 +225,14 @@ export default function AdminDashboard() {
     try {
       await updateUserRole({
         userId,
-        role: newRole as "user" | "admin" | "moderator",
+        role: newRole as 'user' | 'admin' | 'moderator',
       }).unwrap();
-      toast({ title: "User role updated successfully!" });
+      toast({ title: 'User role updated successfully!' });
     } catch (error) {
       toast({
-        variant: "destructive",
-        title: "Error updating user role",
-        description: "Please try again later.",
+        variant: 'destructive',
+        title: 'Error updating user role',
+        description: 'Please try again later.',
       });
     }
   };
@@ -238,9 +254,9 @@ export default function AdminDashboard() {
                 Admin
               </Badge>
               <Avatar className="h-8 w-8">
-                <AvatarImage src={session?.user?.image || ""} />
+                <AvatarImage src={session?.user?.image || ''} />
                 <AvatarFallback>
-                  {session?.user?.name?.[0] || "A"}
+                  {session?.user?.name?.[0] || 'A'}
                 </AvatarFallback>
               </Avatar>
             </div>
@@ -366,10 +382,13 @@ export default function AdminDashboard() {
                   ) : (
                     <ChartContainer
                       config={{
-                        users: { label: "Users", color: "hsl(var(--chart-1))" },
+                        users: {
+                          label: 'Users',
+                          color: 'hsl(var(--chart-1))',
+                        },
                         campaigns: {
-                          label: "Campaigns",
-                          color: "hsl(var(--chart-2))",
+                          label: 'Campaigns',
+                          color: 'hsl(var(--chart-2))',
                         },
                       }}
                       className="h-64"
@@ -408,7 +427,10 @@ export default function AdminDashboard() {
                   ) : (
                     <ChartContainer
                       config={{
-                        count: { label: "Count", color: "hsl(var(--chart-3))" },
+                        count: {
+                          label: 'Count',
+                          color: 'hsl(var(--chart-3))',
+                        },
                       }}
                       className="h-64"
                     >
@@ -492,7 +514,7 @@ export default function AdminDashboard() {
                       />
                     </div>
                     <Button type="submit" disabled={createLoading}>
-                      {createLoading ? "Creating..." : "Create Campaign"}
+                      {createLoading ? 'Creating...' : 'Create Campaign'}
                     </Button>
                   </form>
                 </DialogContent>
@@ -528,7 +550,7 @@ export default function AdminDashboard() {
                                 src={
                                   campaign.templateUrl ||
                                   campaign.imageUrl ||
-                                  "/placeholder.svg"
+                                  '/placeholder.svg'
                                 }
                                 alt={campaign.title}
                                 className="w-10 h-10 rounded object-cover"
@@ -606,7 +628,7 @@ export default function AdminDashboard() {
                                       }
                                       disabled={deleteLoading}
                                     >
-                                      {deleteLoading ? "Deleting..." : "Delete"}
+                                      {deleteLoading ? 'Deleting...' : 'Delete'}
                                     </AlertDialogAction>
                                   </AlertDialogFooter>
                                 </AlertDialogContent>
@@ -651,13 +673,13 @@ export default function AdminDashboard() {
                           <TableCell>
                             <div className="flex items-center space-x-3">
                               <Avatar className="h-8 w-8">
-                                <AvatarImage src={user.image || ""} />
+                                <AvatarImage src={user.image || ''} />
                                 <AvatarFallback>
-                                  {user.name?.[0] || "U"}
+                                  {user.name?.[0] || 'U'}
                                 </AvatarFallback>
                               </Avatar>
                               <div className="font-medium">
-                                {user.name || "Unknown"}
+                                {user.name || 'Unknown'}
                               </div>
                             </div>
                           </TableCell>
@@ -665,11 +687,11 @@ export default function AdminDashboard() {
                           <TableCell>
                             <Badge
                               variant={
-                                user.role === "admin"
-                                  ? "default"
-                                  : user.role === "moderator"
-                                  ? "secondary"
-                                  : "outline"
+                                user.role === 'admin'
+                                  ? 'default'
+                                  : user.role === 'moderator'
+                                  ? 'secondary'
+                                  : 'outline'
                               }
                             >
                               {user.role}
@@ -724,10 +746,13 @@ export default function AdminDashboard() {
                   ) : (
                     <ChartContainer
                       config={{
-                        users: { label: "Users", color: "hsl(var(--chart-1))" },
+                        users: {
+                          label: 'Users',
+                          color: 'hsl(var(--chart-1))',
+                        },
                         campaigns: {
-                          label: "Campaigns",
-                          color: "hsl(var(--chart-2))",
+                          label: 'Campaigns',
+                          color: 'hsl(var(--chart-2))',
                         },
                       }}
                       className="h-64"
@@ -768,10 +793,13 @@ export default function AdminDashboard() {
                   ) : (
                     <ChartContainer
                       config={{
-                        views: { label: "Views", color: "hsl(var(--chart-3))" },
+                        views: {
+                          label: 'Views',
+                          color: 'hsl(var(--chart-3))',
+                        },
                         downloads: {
-                          label: "Downloads",
-                          color: "hsl(var(--chart-4))",
+                          label: 'Downloads',
+                          color: 'hsl(var(--chart-4))',
                         },
                       }}
                       className="h-64"
@@ -881,7 +909,7 @@ export default function AdminDashboard() {
                 <Input
                   id="edit-tags"
                   name="tags"
-                  defaultValue={selectedCampaign.tags?.join(", ") || ""}
+                  defaultValue={selectedCampaign.tags?.join(', ') || ''}
                 />
               </div>
               <div>
@@ -893,13 +921,13 @@ export default function AdminDashboard() {
                   defaultValue={
                     selectedCampaign.templateUrl ||
                     selectedCampaign.imageUrl ||
-                    ""
+                    ''
                   }
                   required
                 />
               </div>
               <Button type="submit" disabled={updateLoading}>
-                {updateLoading ? "Updating..." : "Update Campaign"}
+                {updateLoading ? 'Updating...' : 'Update Campaign'}
               </Button>
             </form>
           )}

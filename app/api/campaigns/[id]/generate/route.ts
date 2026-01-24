@@ -1,37 +1,44 @@
-import { type NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { type NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import {
   getCampaignsCollection,
   getGeneratedBannersCollection,
   isValidObjectId,
   createObjectId,
-} from "@/lib/database";
-import type { GeneratedBanner } from "@/lib/types";
-import sharp from "sharp";
+} from '@/lib/database';
+import type { GeneratedBanner } from '@/lib/types';
+import sharp from 'sharp';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const session = await getServerSession(authOptions);
-    const { id } = params;
+
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Please authenticate' },
+        { status: 401 },
+      );
+    }
+    const { id } = await params;
 
     if (!isValidObjectId(id)) {
       return NextResponse.json(
-        { error: "Invalid campaign ID" },
-        { status: 400 }
+        { error: 'Invalid campaign ID' },
+        { status: 400 },
       );
     }
 
     const formData = await request.formData();
-    const photoFile = formData.get("photo") as File;
+    const photoFile = formData.get('photo') as File;
 
     if (!photoFile) {
       return NextResponse.json(
-        { error: "Photo file is required" },
-        { status: 400 }
+        { error: 'Photo file is required' },
+        { status: 400 },
       );
     }
 
@@ -41,8 +48,8 @@ export async function POST(
 
     if (!campaign) {
       return NextResponse.json(
-        { error: "Campaign not found" },
-        { status: 404 }
+        { error: 'Campaign not found' },
+        { status: 404 },
       );
     }
 
@@ -51,14 +58,14 @@ export async function POST(
 
     // Resize and optimize the photo
     const processedPhoto = await sharp(photoBuffer)
-      .resize(800, 600, { fit: "cover" })
+      .resize(800, 600, { fit: 'cover' })
       .jpeg({ quality: 85 })
       .toBuffer();
 
     // For demo purposes, we'll create a simple banner by overlaying text
     // In a real implementation, you'd use the campaign template
     const bannerBuffer = await sharp(processedPhoto)
-      .resize(1200, 630, { fit: "cover" })
+      .resize(1200, 630, { fit: 'cover' })
       .composite([
         {
           input: Buffer.from(`
@@ -79,10 +86,10 @@ export async function POST(
     // In a real implementation, you'd save these to a cloud storage service
     // For now, we'll create data URLs
     const photoDataUrl = `data:image/jpeg;base64,${processedPhoto.toString(
-      "base64"
+      'base64',
     )}`;
     const bannerDataUrl = `data:image/png;base64,${bannerBuffer.toString(
-      "base64"
+      'base64',
     )}`;
 
     // Save the generated banner record
@@ -90,13 +97,10 @@ export async function POST(
 
     const newBanner: GeneratedBanner = {
       campaignId: createObjectId(id),
-      userId: session?.user?.id ? createObjectId(session.user.id) : undefined,
-      userEmail: session?.user?.email || undefined,
-      photoUrl: photoDataUrl,
-      bannerUrl: bannerDataUrl,
+      userId: createObjectId(session.user.id),
+      imageUrl: photoDataUrl,
       downloadCount: 0,
       createdAt: new Date(),
-      isPublic: true,
     };
 
     const result = await generatedBanners.insertOne(newBanner);
@@ -104,7 +108,7 @@ export async function POST(
     // Update campaign download count
     await campaigns.updateOne(
       { _id: createObjectId(id) },
-      { $inc: { downloadCount: 1 } }
+      { $inc: { downloadCount: 1 } },
     );
 
     return NextResponse.json({
@@ -114,10 +118,10 @@ export async function POST(
       photoUrl: photoDataUrl,
     });
   } catch (error) {
-    console.error("Error generating banner:", error);
+    console.error('Error generating banner:', error);
     return NextResponse.json(
-      { error: "Failed to generate banner" },
-      { status: 500 }
+      { error: 'Failed to generate banner' },
+      { status: 500 },
     );
   }
 }
