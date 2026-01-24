@@ -156,18 +156,16 @@ export default function RecentsPage() {
     role: 'user',
   });
 
-  const handleAuthSuccess = (userData: any) => {
-    setIsLoggedIn(true);
-    setUser(userData);
-    setIsAuthModalOpen(false);
-  };
-
   const handleLogout = () => {
     setIsLoggedIn(false);
     setUser({ name: '', avatar: '', role: 'user' });
   };
   const RecentBannersPage = ({}) => {
     // Component code...
+  };
+
+  const handleAuthSuccess = () => {
+    setIsAuthModalOpen(false);
   };
 
   return (
@@ -187,7 +185,7 @@ export default function RecentsPage() {
             Recent Campaigns and Events
           </h1>
           <p className="text-xl md:text-2xl mb-8 text-gray-100">
-            See trending and recent enagements
+            Discover what's capturing attention right now
           </p>
         </div>
       </section>
