@@ -27,6 +27,7 @@ import {
   Sparkles,
   ArrowLeft,
   ExternalLink,
+  Palette,
 } from "lucide-react";
 import {
   useGetCampaignByIdQuery,
@@ -37,6 +38,7 @@ import {
 import BannerPreview from "@/components/banner-preview";
 import CommentsSection from "@/components/comments-section";
 import PhotoUpload from "@/components/photo-upload";
+import DesignerModal from "@/components/designer-modal";
 import Footer from "@/components/footer";
 
 export default function CampaignDetailPage() {
@@ -49,6 +51,9 @@ export default function CampaignDetailPage() {
   const [userPhoto, setUserPhoto] = useState<string | null>(null);
   const [generatedBanner, setGeneratedBanner] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  
+  // State for designer modal
+  const [isDesignerOpen, setIsDesignerOpen] = useState(false);
 
   // RTK Query hooks
   const {
@@ -188,6 +193,10 @@ export default function CampaignDetailPage() {
               Back
             </Button>
             <div className="flex items-center space-x-4">
+              <Button variant="outline" onClick={() => setIsDesignerOpen(true)}>
+                <Palette className="w-4 h-4 mr-2" />
+                Design
+              </Button>
               <Button variant="outline" onClick={handleShare}>
                 <Share2 className="w-4 h-4 mr-2" />
                 Share
@@ -426,6 +435,13 @@ export default function CampaignDetailPage() {
           </div>
         </div>
       </main>
+
+      <DesignerModal
+        isOpen={isDesignerOpen}
+        onClose={() => setIsDesignerOpen(false)}
+        campaignId={campaignId}
+        campaignName={campaign.title}
+      />
 
       <Footer />
     </div>
